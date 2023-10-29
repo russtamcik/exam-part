@@ -1,0 +1,16 @@
+.card {
+  padding: 20px;
+  background-color: #e3e0e0 !important;
+}
+
+.knop{
+  display: flex;
+  gap: 15px;
+}
+
+.card-title{
+  padding: 10px;
+  border: 1px solid #f5deb3;
+  background-color: wheat;
+  border-radius: 5px;
+}
