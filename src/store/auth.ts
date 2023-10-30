@@ -4,11 +4,15 @@ import Cookies from "js-cookie";
 import User from "../types/user";
 import { devtools } from "zustand/middleware";
 import { TOKEN, USER } from "../constants";
+// import SingUp from "../types/signup";
+// import { NavigateFunction } from "react-router-dom";
 
 interface AuthState {
   isAuthenticated: boolean;
   user: null | User;
   login: (values: User) => void;
+  // register: (values: SingUp, navigate: NavigateFunction) => void;
+  // password: (values: Password) => void;
 }
 
 const useAuth = create<AuthState>()(

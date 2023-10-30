@@ -149,18 +149,7 @@ const AdminLayout = () => {
           ))}
         </List>
         <Divider />
-        {/* <List>
-          {["Settings", "Log Out"].map((text, index) => (
-            <ListItem key={text} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  {index % 2 === 0 ? <SettingsIcon /> : <LogoutIcon />}
-                </ListItemIcon>
-                <ListItemText primary={text} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List> */}
+        
         <List>
           {[
             { text: "Settings", link: "/settings", icon: <SettingsIcon /> },
