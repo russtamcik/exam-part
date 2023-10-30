@@ -70,12 +70,12 @@ const LoginPage = () => {
     login(user);
 
     if (user.role === "client") {
-      toast.success("You will be Client");
+      toast.success("You are Client");
     }
 
     if (user.role === "admin") {
       Cookies.set(TOKEN, token);
-      toast.success("You will be Admin");
+      toast.success("You are Admin");
       window.location.href =
         "https://amazing-pixie-baea2d.netlify.app/dashboard";
       return;

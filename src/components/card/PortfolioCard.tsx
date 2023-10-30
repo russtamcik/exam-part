@@ -26,6 +26,7 @@ const PortfolioCards = ({
               portfolios.photo._id
             }.${portfolios.photo.name.split(".")[1]}`}
             alt="img"
+            className="object-fit-cover"
           />
         </div>
         <div className="knop">

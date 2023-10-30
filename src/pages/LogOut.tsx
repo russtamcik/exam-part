@@ -1,11 +1,12 @@
 import { useNavigate } from "react-router-dom";
-import { TOKEN } from "../constants";
+import { USER, TOKEN } from "../constants";
 import Cookies from "js-cookie";
 
 const LogOut = () => {
   const navigate = useNavigate();
   const logout = () => {
     Cookies.remove(TOKEN);
+    localStorage.removeItem(USER);
     navigate("/login");
   };
 
