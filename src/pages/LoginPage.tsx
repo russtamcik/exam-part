@@ -20,6 +20,7 @@ import Grid from "@mui/material/Grid";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { toast } from "react-toastify";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function Copyright(props: any) {
@@ -68,8 +69,13 @@ const LoginPage = () => {
     setUser(user);
     login(user);
 
+    if (user.role === "client") {
+      toast.success("You will be Client");
+    }
+
     if (user.role === "admin") {
       Cookies.set(TOKEN, token);
+      toast.success("You will be Admin");
       window.location.href =
         "https://amazing-pixie-baea2d.netlify.app/dashboard";
       return;

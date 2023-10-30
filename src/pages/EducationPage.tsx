@@ -1,10 +1,12 @@
 import { useEffect } from "react";
-import { Form, Input, Modal } from "antd";
+import React from "react";
 
 import request from "../server";
 import useEducation from "../store/education";
 import EducationCards from "../components/card/EducationCard";
 import Education from "../types/education";
+import { SchemaModel, StringType } from "schema-typed";
+import { Modal, Form, Button } from "rsuite";
 
 const EducationPage = () => {
   const {
@@ -12,7 +14,6 @@ const EducationPage = () => {
     education,
     total,
     page,
-    isModalOpen,
     modalLoading,
     selected,
     loading,
@@ -20,43 +21,62 @@ const EducationPage = () => {
     getEducation,
     setPage,
     setSearch,
-    showModal,
     controlModal,
     setSelected,
     setModalLoading,
   } = useEducation();
 
-  const [form] = Form.useForm();
-  console.log(education);
+  const [formValue, setFormValue] = React.useState<Partial<Education>>({});
+  const pageTotal = 10;
+  const [open, setOpen] = React.useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
   useEffect(() => {
     getEducation();
   }, [getEducation, user]);
 
-  const pageTotal = 10;
+  const handleFormChange = (value: Partial<Education>) => {
+    setFormValue(value);
+  };
 
-  const handleOk = async () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const formRef = React.useRef<any>(null);
+
+  const handleModalClose = () => {
+    controlModal(false);
+    setFormValue({});
+  };
+
+  const handleModalConfirm = async () => {
     try {
       setModalLoading(true);
-      const values = await form.validateFields();
+      const isValid = formRef.current.check();
+      if (!isValid) {
+        console.error("Form error!");
+        return;
+      }
+
       if (selected === null) {
-        await request.post("education", values);
+        await request.post("education", formValue);
       } else {
-        await request.put(`education/${selected}`, values);
+        await request.put(`education/${selected}`, formValue);
       }
       getEducation();
-      controlModal(false);
-      form.resetFields();
+      handleModalClose();
+      handleClose();
+      setFormValue({});
     } finally {
       setModalLoading(false);
     }
   };
 
   const editEducation = async (id: string) => {
-    const { data } = await request.get(`education/${id}`);
-    form.setFieldsValue(data);
+    const { data } = await request.get<Education>(`education/${id}`);
+    setFormValue(data);
     controlModal(true);
     setSelected(id);
+    handleOpen();
   };
 
   const deleteEducation = async (id: string) => {
@@ -67,10 +87,18 @@ const EducationPage = () => {
     }
   };
 
+  const model = SchemaModel({
+    name: StringType().isRequired("Please fill your education name"),
+    level: StringType().isRequired("Please fill education level"),
+    description: StringType().isRequired("Please fill education level"),
+    startDate: StringType().isRequired("Please fill start date"),
+    endDate: StringType().isRequired("Please fill endt date"),
+  });
+
   const totalPages = Math.ceil(total / pageTotal);
 
   return (
-    <div className="ant-modal-content">
+    <div>
       <input
         type="text"
         className="form-control"
@@ -78,6 +106,7 @@ const EducationPage = () => {
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
+
       {loading ? (
         <div className="typewriter">
           <div className="slide">
@@ -87,10 +116,10 @@ const EducationPage = () => {
           <div className="keyboard"></div>
         </div>
       ) : (
-        <div style={{ backgroundColor: "grey", height: "100%" }}>
+        <div>
           <div className="totals">Education ({total})</div>
           <div className="input-group mb-3 input-add">
-            <button className="btn add-button" onClick={() => showModal(form)}>
+            <button className="btn add-button" onClick={handleOpen}>
               Add Education
             </button>
           </div>
@@ -151,88 +180,59 @@ const EducationPage = () => {
           )}
 
           <Modal
-            title="Education data"
-            maskClosable={false}
-            confirmLoading={modalLoading}
-            okText={selected === null ? "Add education" : "Save education"}
-            open={isModalOpen}
-            onOk={handleOk}
-            onCancel={() => controlModal(false)}
+            open={open}
+            onClose={handleClose}
+            style={{ marginTop: "40px" }}
           >
-            <Form
-              className="antd-modal"
-              name="education"
-              autoComplete="off"
-              labelCol={{
-                span: 24,
-              }}
-              wrapperCol={{
-                span: 24,
-              }}
-              form={form}
-            >
-              <Form.Item<Education>
-                label="Name"
-                name="name"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please fill!",
-                  },
-                ]}
+            <Modal.Header>
+              <Modal.Title>Education</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <Form
+                formValue={formValue}
+                onChange={handleFormChange}
+                ref={formRef}
+                model={model}
               >
-                <Input />
-              </Form.Item>
-
-              <Form.Item<Education>
-                label="Level"
-                name="level"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please fill!",
-                  },
-                ]}
+                <Form.Group>
+                  <Form.ControlLabel>Name</Form.ControlLabel>
+                  <Form.Control name="name" />
+                  <Form.HelpText>Enter education name</Form.HelpText>
+                </Form.Group>
+                <Form.Group>
+                  <Form.ControlLabel>Level</Form.ControlLabel>
+                  <Form.Control name="level" />
+                  <Form.HelpText>Enter education level</Form.HelpText>
+                </Form.Group>
+                <Form.Group>
+                  <Form.ControlLabel>Description</Form.ControlLabel>
+                  <Form.Control name="description" />
+                  <Form.HelpText>Enter education description</Form.HelpText>
+                </Form.Group>
+                <Form.Group>
+                  <Form.ControlLabel>Start Date</Form.ControlLabel>
+                  <Form.Control name="startDate" />
+                  <Form.HelpText>Enter start date</Form.HelpText>
+                </Form.Group>
+                <Form.Group>
+                  <Form.ControlLabel>End Date</Form.ControlLabel>
+                  <Form.Control name="endDate" />
+                  <Form.HelpText>Enter end date</Form.HelpText>
+                </Form.Group>
+              </Form>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button
+                onClick={handleModalConfirm}
+                appearance="primary"
+                loading={modalLoading}
               >
-                <Input />
-              </Form.Item>
-              <Form.Item<Education>
-                label="Description"
-                name="description"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please fill!",
-                  },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-              <Form.Item<Education>
-                label="Start Date"
-                name="startDate"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please fill!",
-                  },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-              <Form.Item<Education>
-                label="End Date"
-                name="endDate"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please fill!",
-                  },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-            </Form>
+                {selected === null ? "Add Education" : "Edit Education"}
+              </Button>
+              <Button onClick={handleClose} appearance="subtle">
+                Cancel
+              </Button>
+            </Modal.Footer>
           </Modal>
         </div>
       )}

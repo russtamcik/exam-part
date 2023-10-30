@@ -1,9 +1,10 @@
-import { useEffect } from "react";
-import { Form, Input, Modal } from "antd";
+import React, { useEffect } from "react";
 import useSkill from "../store/skill";
 import request from "../server";
 import Skill from "../types/skill";
 import SkillsCards from "../components/card/SkillsCards";
+import { SchemaModel, StringType, NumberType } from "schema-typed";
+import { Modal, Form, Button } from "rsuite";
 
 import "../css/SkillPage.css";
 
@@ -13,7 +14,6 @@ const Skills = () => {
     skills,
     total,
     page,
-    isModalOpen,
     modalLoading,
     selected,
     loading,
@@ -21,53 +21,81 @@ const Skills = () => {
     getSkills,
     setPage,
     setSearch,
-    showModal,
     controlModal,
     setSelected,
     setModalLoading,
   } = useSkill();
 
-  const [form] = Form.useForm();
+  const [formValue, setFormValue] = React.useState<Partial<Skill>>({});
+  const pageTotal = 10;
+  const [open, setOpen] = React.useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
   useEffect(() => {
     getSkills();
   }, [getSkills, user]);
 
-  const pageTotal = 10;
+  const handleFormChange = (value: Partial<Skill>) => {
+    setFormValue(value);
+  };
 
-  const handleOk = async () => {
+  const handleModalClose = () => {
+    controlModal(false);
+    setFormValue({});
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const formRef = React.useRef<any>(null);
+
+  const handleModalConfirm = async () => {
     try {
       setModalLoading(true);
-      const values = await form.validateFields();
+      const isValid = formRef.current.check();
+      if (!isValid) {
+        console.error("Form error!");
+        return;
+      }
+
       if (selected === null) {
-        await request.post("skills", values);
+        await request.post("skills", formValue);
       } else {
-        await request.put(`skills/${selected}`, values);
+        await request.put(`skills/${selected}`, formValue);
       }
       getSkills();
-      controlModal(false);
-      form.resetFields();
+      handleModalClose();
+      handleClose();
+      setFormValue({});
     } finally {
       setModalLoading(false);
     }
   };
 
   const editSkills = async (id: string) => {
-    const { data } = await request.get(`skills/${id}`);
-    form.setFieldsValue(data);
+    const { data } = await request.get<Skill>(`skills/${id}`);
+    setFormValue(data);
     controlModal(true);
     setSelected(id);
+    handleOpen();
   };
 
   const deleteSkills = async (id: string) => {
-    await request.delete(`skills/${id}`);
-    getSkills();
+    const shouldDelete = window.confirm("Are you sure you want to delete?");
+    if (shouldDelete) {
+      await request.delete(`skills/${id}`);
+      getSkills();
+    }
   };
+
+  const model = SchemaModel({
+    name: StringType().isRequired("Please fill your skill name"),
+    percent: NumberType().isRequired("Please fill percent"),
+  });
 
   const totalPages = Math.ceil(total / pageTotal);
 
   return (
-    <div className="ant-modal-content">
+    <div>
       <input
         type="text"
         className="form-control"
@@ -75,6 +103,7 @@ const Skills = () => {
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
+
       {loading ? (
         <div className="typewriter">
           <div className="slide">
@@ -84,10 +113,10 @@ const Skills = () => {
           <div className="keyboard"></div>
         </div>
       ) : (
-        <div style={{ backgroundColor: "grey", height: "100%" }}>
+        <div>
           <div className="totals">Skills ({total})</div>
           <div className="input-group mb-3 input-add">
-            <button className="btn add-button" onClick={() => showModal(form)}>
+            <button className="btn add-button" onClick={handleOpen}>
               Add Skills
             </button>
           </div>
@@ -148,52 +177,44 @@ const Skills = () => {
           )}
 
           <Modal
-            title="Skills data"
-            maskClosable={false}
-            confirmLoading={modalLoading}
-            okText={selected === null ? "Add skill" : "Save skill"}
-            open={isModalOpen}
-            onOk={handleOk}
-            onCancel={() => controlModal(false)}
+            open={open}
+            onClose={handleClose}
+            style={{ marginTop: "40px" }}
           >
-            <Form
-              className="antd-modal"
-              name="category"
-              autoComplete="off"
-              labelCol={{
-                span: 24,
-              }}
-              wrapperCol={{
-                span: 24,
-              }}
-              form={form}
-            >
-              <Form.Item<Skill>
-                label="Name"
-                name="name"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please fill!",
-                  },
-                ]}
+            <Modal.Header>
+              <Modal.Title>Skills</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <Form
+                formValue={formValue}
+                onChange={handleFormChange}
+                ref={formRef}
+                model={model}
               >
-                <Input />
-              </Form.Item>
-
-              <Form.Item<Skill>
-                label="Percent"
-                name="percent"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please fill!",
-                  },
-                ]}
+                <Form.Group>
+                  <Form.ControlLabel>Name</Form.ControlLabel>
+                  <Form.Control name="name" />
+                  <Form.HelpText>Enter skill name</Form.HelpText>
+                </Form.Group>
+                <Form.Group>
+                  <Form.ControlLabel>Percents</Form.ControlLabel>
+                  <Form.Control name="percent" />
+                  <Form.HelpText>Enter skill percent</Form.HelpText>
+                </Form.Group>
+              </Form>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button
+                onClick={handleModalConfirm}
+                appearance="primary"
+                loading={modalLoading}
               >
-                <Input />
-              </Form.Item>
-            </Form>
+                {selected === null ? "Add Skill" : "Edit Skill"}
+              </Button>
+              <Button onClick={handleClose} appearance="subtle">
+                Cancel
+              </Button>
+            </Modal.Footer>
           </Modal>
         </div>
       )}
