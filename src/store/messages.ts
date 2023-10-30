@@ -2,14 +2,14 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 
-import Experience from "../types/experience";
 import request from "../server";
 import User from "../types/user";
 import { LIMIT, USER } from "../constants";
+import Messages from "../types/messages";
 
-interface ExperienceState {
+interface MessagesState {
   user: null | User;
-  experience: Experience[];
+  messages: Messages[];
   loading: boolean;
   total: number;
   page: number;
@@ -17,7 +17,7 @@ interface ExperienceState {
   modalLoading: boolean;
   selected: null | string;
   search: string;
-  getExperience: () => void;
+  getMessages: () => void;
   setPage: (page: number) => void;
   controlModal: (data: boolean) => void;
   showModal: () => void;
@@ -31,13 +31,13 @@ const userId = localStorage.getItem("PORTFOLIO_USER")
   ? JSON.parse(localStorage.getItem("PORTFOLIO_USER") || "")
   : null;
 
-const useExperience = create<ExperienceState>()(
+const useMessages = create<MessagesState>()(
   devtools(
     immer((set, get) => ({
       user: localStorage.getItem(USER)
         ? JSON.parse(localStorage.getItem(USER) || "")
         : null,
-      experience: [],
+      messages: [],
       loading: false,
       isModalOpen: false,
       modalLoading: false,
@@ -46,14 +46,14 @@ const useExperience = create<ExperienceState>()(
       page: 1,
       search: "",
 
-      getExperience: async () => {
+      getMessages: async () => {
         try {
           set((state) => {
             state.loading = true;
           });
           const {
             data: { pagination, data },
-          } = await request.get("experiences", {
+          } = await request.get("messages", {
             params: {
               page: get().page,
               limit: LIMIT,
@@ -62,7 +62,7 @@ const useExperience = create<ExperienceState>()(
             },
           });
           set((state) => {
-            state.experience = data;
+            state.messages = data;
             state.total = pagination.total;
             state.loading = false;
           });
@@ -76,13 +76,13 @@ const useExperience = create<ExperienceState>()(
         set((state) => {
           state.search = search;
         });
-        get().getExperience();
+        get().getMessages();
       },
       setPage: (page) => {
         set((state) => {
           state.page = page;
         });
-        get().getExperience();
+        get().getMessages();
       },
       controlModal: (data) => {
         set((state) => {
@@ -112,4 +112,4 @@ const useExperience = create<ExperienceState>()(
   )
 );
 
-export default useExperience;
+export default useMessages;

@@ -67,6 +67,13 @@ const LoginPage = () => {
     location.reload();
     setUser(user);
     login(user);
+
+    if (user.role === "admin") {
+      Cookies.set(TOKEN, token);
+      window.location.href =
+        "https://amazing-pixie-baea2d.netlify.app/dashboard";
+      return;
+    }
   };
 
   const defaultTheme = createTheme();
