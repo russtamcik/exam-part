@@ -1,12 +1,12 @@
-import { useEffect } from "react";
-import { Button, Form, Input, Modal, Upload } from "antd";
+import React, { useEffect, useState } from "react";
 
 import request from "../server";
 
 import PortfolioCards from "../components/card/PortfolioCard";
 import Portfolio from "../types/portfolio";
 import usePortfolio from "../store/portfoli";
-import { UploadOutlined } from "@mui/icons-material";
+import { Modal, Form, Button, Uploader } from "rsuite";
+import { SchemaModel, StringType } from "schema-typed";
 
 const PortfolioPage = () => {
   const {
@@ -14,7 +14,7 @@ const PortfolioPage = () => {
     portfolios,
     total,
     page,
-    isModalOpen,
+
     modalLoading,
     selected,
     loading,
@@ -22,43 +22,77 @@ const PortfolioPage = () => {
     getPortfolio,
     setPage,
     setSearch,
-    showModal,
+
     controlModal,
     setSelected,
     setModalLoading,
   } = usePortfolio();
 
-  const [form] = Form.useForm();
-  console.log(portfolios);
+  const [formValue, setFormValue] = React.useState<Partial<Portfolio>>({});
+  const pageTotal = 10;
+  const [open, setOpen] = React.useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+  const [photoFile, setPhotoFile] = useState(null);
 
   useEffect(() => {
     getPortfolio();
   }, [getPortfolio, user]);
 
-  const pageTotal = 10;
+  const handleFormChange = (value: Partial<Portfolio>) => {
+    setFormValue(value);
+  };
 
-  const handleOk = async () => {
+  const handleModalClose = () => {
+    controlModal(false);
+    setFormValue({});
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handlePhotoUpload = (fileList: string | any[]) => {
+    if (fileList.length > 0) {
+      const file = fileList[0];
+      setPhotoFile(file.blobFile); // Save the uploaded file
+    }
+  };
+
+  const handleSubmit = () => {
+    // Perform form submission logic here
+    console.log("Uploaded photo:", photoFile);
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const formRef = React.useRef<any>(null);
+
+  const handleModalConfirm = async () => {
     try {
       setModalLoading(true);
-      const values = await form.validateFields();
+      const isValid = formRef.current.check();
+      if (!isValid) {
+        console.error("Form error!");
+        return;
+      }
+
       if (selected === null) {
-        await request.post("portfolios", values);
+        await request.post("portfolios", formValue);
       } else {
-        await request.put(`portfolios/${selected}`, values);
+        await request.put(`portfolios/${selected}`, formValue);
       }
       getPortfolio();
-      controlModal(false);
-      form.resetFields();
+      handleModalClose();
+      handleClose();
+      setFormValue({});
     } finally {
       setModalLoading(false);
     }
   };
 
   const editPortfolio = async (id: string) => {
-    const { data } = await request.get(`portfolios/${id}`);
-    form.setFieldsValue(data);
+    const { data } = await request.get<Portfolio>(`portfolios/${id}`);
+    setFormValue(data);
     controlModal(true);
     setSelected(id);
+    handleOpen();
   };
 
   const deletePortfolio = async (id: string) => {
@@ -69,21 +103,24 @@ const PortfolioPage = () => {
     }
   };
 
-  const handleImageUpload = (file: File | null) => {
-    console.log("Uploaded file:", file);
-  };
+  const model = SchemaModel({
+    name: StringType().isRequired("Please fill your portfolio Name"),
+    url: StringType().isRequired("Please fill email"),
+    description: StringType().isRequired("Please fill description"),
+  });
 
   const totalPages = Math.ceil(total / pageTotal);
 
   return (
-    <div className="ant-modal-content">
+    <div>
       <input
         type="text"
         className="form-control"
-        placeholder="Search education..."
+        placeholder="Search protfolio..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
+
       {loading ? (
         <div className="typewriter">
           <div className="slide">
@@ -93,21 +130,21 @@ const PortfolioPage = () => {
           <div className="keyboard"></div>
         </div>
       ) : (
-        <div style={{ backgroundColor: "grey", height: "100%" }}>
-          <div className="totals">Education ({total})</div>
+        <div>
+          <div className="totals">Protfolio ({total})</div>
           <div className="input-group mb-3 input-add">
-            <button className="btn add-button" onClick={() => showModal(form)}>
-              Add Education
+            <button className="btn add-button" onClick={handleOpen}>
+              Add Protfolio
             </button>
           </div>
 
           <div className="all">
-            {portfolios.map((portfolios: Portfolio) => (
+            {portfolios.map((portfolio) => (
               <PortfolioCards
-                key={portfolios._id}
+                key={portfolio._id}
                 editPortfolio={editPortfolio}
                 deletePortfolio={deletePortfolio}
-                portfolios={portfolios}
+                portfolios={portfolio}
               />
             ))}
           </div>
@@ -157,70 +194,67 @@ const PortfolioPage = () => {
           )}
 
           <Modal
-            title="Portfolio data"
-            maskClosable={false}
-            confirmLoading={modalLoading}
-            okText={selected === null ? "Add portfolio" : "Save portfolio"}
-            open={isModalOpen}
-            onOk={handleOk}
-            onCancel={() => controlModal(false)}
+            open={open}
+            onClose={handleClose}
+            style={{ marginTop: "40px" }}
           >
-            <Form
-              className="antd-modal"
-              name="portfolio"
-              autoComplete="off"
-              labelCol={{
-                span: 24,
-              }}
-              wrapperCol={{
-                span: 24,
-              }}
-              form={form}
-            >
-              <Form.Item<Portfolio>
-                label="Portfolio Name"
-                name="name"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please fill!",
-                  },
-                ]}
+            <Modal.Header>
+              <Modal.Title>Portfolios</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <Form
+                formValue={formValue}
+                onChange={handleFormChange}
+                ref={formRef}
+                model={model}
+                onSubmit={handleSubmit}
               >
-                <Input />
-              </Form.Item>
-
-              <Form.Item<Portfolio>
-                label="Portfolio Url"
-                name="url"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please fill!",
-                  },
-                ]}
+                <Form.Group>
+                  <Form.ControlLabel>Portfolio Name</Form.ControlLabel>
+                  <Form.Control name="name" />
+                  <Form.HelpText>Enter portfolio name</Form.HelpText>
+                </Form.Group>
+                <Form.Group>
+                  <Form.ControlLabel>Url</Form.ControlLabel>
+                  <Form.Control name="url" />
+                  <Form.HelpText>Enter url</Form.HelpText>
+                </Form.Group>
+                <Form.Group>
+                  <Form.ControlLabel>Description</Form.ControlLabel>
+                  <Form.Control
+                    name="description"
+                    componentClass="textarea"
+                    rows={5}
+                  />
+                  <Form.HelpText>Enter description name</Form.HelpText>
+                </Form.Group>
+                {/* <Form.Group controlId="uploader">
+                  <Form.ControlLabel>Photo</Form.ControlLabel>
+                  <Form.Control name="photo" accepter={Uploader} action="#" />
+                </Form.Group> */}
+                <Form.Group>
+                  <Form.ControlLabel>Upload Photo</Form.ControlLabel>
+                  <Uploader
+                    name="photo"
+                    fileListVisible={false}
+                    onChange={handlePhotoUpload}
+                    action=""
+                  />
+                </Form.Group>
+              </Form>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button
+                onClick={handleModalConfirm}
+                appearance="primary"
+                loading={modalLoading}
               >
-                <Input />
-              </Form.Item>
-
-              <Form.Item<Portfolio>
-                label="Description"
-                name="description"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please fill!",
-                  },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-              <Form.Item<Portfolio> label="Image" name="photo">
-                <Upload beforeUpload={handleImageUpload} accept="image/*">
-                  <Button icon={<UploadOutlined />}>Upload Image</Button>
-                </Upload>
-              </Form.Item>
-            </Form>
+                {selected === null ? "Add Protfolio" : "Edit Protfolio"}
+              </Button>
+              <Button onClick={handleClose} appearance="subtle">
+                Cancel
+              </Button>
+            </Modal.Footer>
           </Modal>
         </div>
       )}
