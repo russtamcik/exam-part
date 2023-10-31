@@ -1,4 +1,3 @@
-import Experience from "../types/experience";
 import React, { useEffect } from "react";
 import request from "../server";
 
@@ -6,6 +5,7 @@ import { Modal, Form, Button } from "rsuite";
 import { SchemaModel, StringType } from "schema-typed";
 import useMessages from "../store/messages";
 import MessagesCards from "../components/card/MessagesCard";
+import Messages from "../types/messages";
 const MessagesPage: React.FC = () => {
   const {
     user,
@@ -24,7 +24,7 @@ const MessagesPage: React.FC = () => {
     setModalLoading,
   } = useMessages();
 
-  const [formValue, setFormValue] = React.useState<Partial<Experience>>({});
+  const [formValue, setFormValue] = React.useState<Partial<Messages>>({});
   const pageTotal = 10;
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
@@ -34,7 +34,7 @@ const MessagesPage: React.FC = () => {
     getMessages();
   }, [getMessages, user]);
 
-  const handleFormChange = (value: Partial<Experience>) => {
+  const handleFormChange = (value: Partial<Messages>) => {
     setFormValue(value);
   };
 
@@ -45,30 +45,6 @@ const MessagesPage: React.FC = () => {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const formRef = React.useRef<any>(null);
-
-  // const handleModalConfirm = async () => {
-  //   try {
-  //     setModalLoading(true);
-  //     const isValid = formRef.current.check();
-  //     const valueData = { ...formRef, whom: user?._id };
-  //     if (!isValid) {
-  //       console.error("Form error!");
-  //       return;
-  //     }
-
-  //     if (selected === null) {
-  //       await request.post("messages", valueData);
-  //     } else {
-  //       await request.put(`messages/${selected}`, valueData);
-  //     }
-  //     getMessages();
-  //     handleModalClose();
-  //     handleClose();
-  //     setFormValue({});
-  //   } finally {
-  //     setModalLoading(false);
-  //   }
-  // };
 
   const handleModalConfirm = async () => {
     try {
@@ -96,7 +72,7 @@ const MessagesPage: React.FC = () => {
   };
 
   const editMessages = async (id: string) => {
-    const { data } = await request.get<Experience>(`messages/${id}`);
+    const { data } = await request.get<Messages>(`messages/${id}`);
     setFormValue(data);
     controlModal(true);
     setSelected(id);

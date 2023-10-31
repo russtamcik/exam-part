@@ -6,6 +6,10 @@ interface MessagesCardProps {
   deleteMessages: (id: string) => void;
 }
 
+const userId = localStorage.getItem("PORTFOLIO_USER")
+  ? JSON.parse(localStorage.getItem("PORTFOLIO_USER") || "")
+  : null;
+
 const MessagesCards = ({
   messages,
   editMessages,
@@ -16,21 +20,28 @@ const MessagesCards = ({
       <div className="card-body">
         <h5 className="card-title">Answers: {messages.answer}</h5>
         <p className="card-text">Messages title: {messages.title}</p>
+        <p className="card-text">User: {messages.user}</p>
         <p className="card-text">Message: {messages.message}</p>
 
         <div className="knop">
-          <button
-            className="btn btn-primary"
-            onClick={() => editMessages(messages._id)}
-          >
-            Edit
-          </button>
-          <button
-            className="btn btn-danger"
-            onClick={() => deleteMessages(messages._id)}
-          >
-            Delete
-          </button>
+          {userId.role === "client" ? (
+            ""
+          ) : (
+            <div>
+              <button
+                className="btn btn-primary"
+                onClick={() => editMessages(messages._id)}
+              >
+                Edit
+              </button>
+              <button
+                className="btn btn-danger"
+                onClick={() => deleteMessages(messages._id)}
+              >
+                Delete
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

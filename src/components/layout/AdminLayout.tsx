@@ -149,7 +149,7 @@ const AdminLayout = () => {
           ))}
         </List>
         <Divider />
-        
+
         <List>
           {[
             { text: "Settings", link: "/settings", icon: <SettingsIcon /> },
