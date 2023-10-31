@@ -17,7 +17,7 @@ const PortfolioCards = ({
       <div className="card-body">
         <h5 className="card-title">{portfolios.name}</h5>
         <p className="card-text">
-          Level: <a href={portfolios.url}>{portfolios.url}</a>
+          Url: <a href={portfolios.url}>{portfolios.url}</a>
         </p>
         <p className="card-text">Description: {portfolios.description}</p>
         <div className="port">

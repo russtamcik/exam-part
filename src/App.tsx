@@ -11,6 +11,7 @@ import MessagesPage from "./pages/MessagesPage";
 import DashboardPage from "./pages/DashboardPage";
 import SettingsPage from "./pages/SettingsPage";
 import LogOut from "./pages/LogOut";
+import UserPage from "./pages/UserPage";
 
 function App() {
   // const { isAuthenticated, user } = useAuth();
@@ -26,6 +27,8 @@ function App() {
             (isAuthenticated && user?.role === "client") ||
             user?.role === "admin" ? (
               <AdminLayout />
+            ) : isAuthenticated ? (
+              <UserPage />
             ) : (
               <Navigate to="/login" />
             )

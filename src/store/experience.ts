@@ -45,7 +45,6 @@ const useExperience = create<ExperienceState>()(
       total: 0,
       page: 1,
       search: "",
-
       getExperience: async () => {
         try {
           set((state) => {

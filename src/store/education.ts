@@ -3,8 +3,6 @@ import { devtools } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import { LIMIT, USER } from "../constants";
 
-import { FormInstance } from "antd";
-
 import request from "../server";
 import User from "../types/user";
 import Education from "../types/education";
@@ -22,7 +20,7 @@ interface EducationState {
   getEducation: () => void;
   setPage: (page: number) => void;
   controlModal: (data: boolean) => void;
-  showModal: (form: FormInstance) => void;
+  showModal: () => void;
   setUser: (user: User) => void;
   setSelected: (selected: null | string) => void;
   setModalLoading: (data: boolean) => void;
@@ -103,10 +101,9 @@ const useEducation = create<EducationState>()(
           state.isModalOpen = data;
         });
       },
-      showModal: (form) => {
+      showModal: () => {
         get().controlModal(true);
         get().setSelected(null);
-        form.resetFields();
       },
       setUser: (user) => {
         // set((state) => ({ ...state, user }));

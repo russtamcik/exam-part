@@ -58,7 +58,7 @@ const useMessages = create<MessagesState>()(
               page: get().page,
               limit: LIMIT,
               search: get().search,
-              user: userId?._id,
+              whom: userId?._id,
             },
           });
           set((state) => {

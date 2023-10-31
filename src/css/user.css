@@ -1,0 +1,52 @@
+.back-not {
+  background-color: wheat;
+
+  width: 100%;
+  padding: 40px;
+}
+
+.userH {
+  text-align: center;
+}
+
+.userP {
+  font-size: 25px;
+}
+
+.knopka {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 47px;
+  gap: 10px;
+  font-size: 25px;
+  border-radius: 5px;
+}
+
+.userButton {
+  padding: 15px 20px;
+}
+
+.usersapn {
+  color: #fff;
+}
+
+@media (max-width: 510px) {
+  h1 {
+    font-size: 40px;
+  }
+
+  p {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 370px) {
+  h1 {
+    font-size: 30px;
+  }
+
+  p {
+    font-size: 15px;
+  }
+}

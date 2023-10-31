@@ -3,8 +3,6 @@ import { devtools } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import { LIMIT, USER } from "../constants";
 
-import { FormInstance } from "antd";
-
 import request from "../server";
 import User from "../types/user";
 import Portfolio from "../types/portfolio";
@@ -22,7 +20,7 @@ interface PortfolioState {
   getPortfolio: () => void;
   setPage: (page: number) => void;
   controlModal: (data: boolean) => void;
-  showModal: (form: FormInstance) => void;
+  showModal: () => void;
   setUser: (user: User) => void;
   setSelected: (selected: null | string) => void;
   setModalLoading: (data: boolean) => void;
@@ -47,7 +45,6 @@ const usePortfolio = create<PortfolioState>()(
       total: 0,
       page: 1,
       search: "",
-      
       getPortfolio: async () => {
         try {
           // set((state) => ({ ...state, loading: true }));
@@ -103,10 +100,9 @@ const usePortfolio = create<PortfolioState>()(
           state.isModalOpen = data;
         });
       },
-      showModal: (form) => {
+      showModal: () => {
         get().controlModal(true);
         get().setSelected(null);
-        form.resetFields();
       },
       setUser: (user) => {
         // set((state) => ({ ...state, user }));
