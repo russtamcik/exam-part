@@ -51,8 +51,8 @@ const LoginPage = () => {
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const userData: Login = {
-      username: e.currentTarget.username.value,
-      password: e.currentTarget.password.value,
+      username: e.currentTarget.username.value.trim(),
+      password: e.currentTarget.password.value.trim(),
     };
     const {
       data: { token, user },

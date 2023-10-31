@@ -12,6 +12,7 @@ import DashboardPage from "./pages/DashboardPage";
 import SettingsPage from "./pages/SettingsPage";
 import LogOut from "./pages/LogOut";
 import UserPage from "./pages/UserPage";
+import AccauntPage from "./pages/AccauntPage";
 
 function App() {
   // const { isAuthenticated, user } = useAuth();
@@ -42,6 +43,7 @@ function App() {
           <Route path="messages" element={<MessagesPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="logout" element={<LogOut />} />
+          <Route path="account" element={<AccauntPage />} />
         </Route>
         <Route path="/register" element={<RegisterPage />} />
       </Routes>

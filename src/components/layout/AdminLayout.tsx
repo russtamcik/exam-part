@@ -139,6 +139,7 @@ const AdminLayout = () => {
             { text: "Education", link: "/education", icon: <SchoolIcon /> },
             { text: "Portfolios", link: "/portfolios", icon: <InboxIcon /> },
             { text: "Messages", link: "/messages", icon: <ChatIcon /> },
+            { text: "Account", link: "/account", icon: <ChatIcon /> },
           ].map((item) => (
             <ListItem key={item.text} disablePadding>
               <ListItemButton component={Link} to={item.link}>
