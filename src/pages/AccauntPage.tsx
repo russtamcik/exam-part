@@ -41,7 +41,7 @@ const AccauntPage: React.FC = () => {
 
   useEffect(() => {
     getAccData();
-  }, []);
+  }, [getAccData]);
 
   const updateFormData = () => {
     setFormData((prevFormData) => ({

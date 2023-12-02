@@ -24,12 +24,13 @@
 }
 
 .userButton {
+  border-radius: 5px;
   padding: 15px 20px;
+  color: black;
+  background-color: rgb(194, 180, 153);
 }
 
-.usersapn {
-  color: #fff;
-}
+
 
 @media (max-width: 510px) {
   h1 {

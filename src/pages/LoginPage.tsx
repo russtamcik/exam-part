@@ -76,8 +76,7 @@ const LoginPage = () => {
     if (user.role === "admin") {
       Cookies.set(TOKEN, token);
       toast.success("You are Admin");
-      window.location.href =
-        "https://amazing-pixie-baea2d.netlify.app/dashboard";
+      navigate("/dashboard");
       return;
     }
   };
